@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="ESP32/ESP32.vcxproj" Id="cc60d798-0870-4ebf-a051-78b43fe04a40" />
+  <Project Path="TG_Bot_Microcontrollers/TG_Bot_Microcontrollers.csproj" />
+</Solution>
