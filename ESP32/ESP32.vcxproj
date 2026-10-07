@@ -5,6 +5,22 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ESP32-Led_tg|Win32">
+      <Configuration>ESP32-Led_tg</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ESP32-Led_tg|x64">
+      <Configuration>ESP32-Led_tg</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ESP32-Servo_buzzer|Win32">
+      <Configuration>ESP32-Servo_buzzer</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ESP32-Servo_buzzer|x64">
+      <Configuration>ESP32-Servo_buzzer</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -52,6 +68,22 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='ESP32-Servo_buzzer|Win32'">
+    <PlatformToolset>v145</PlatformToolset>
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='ESP32-Servo_buzzer|x64'">
+    <PlatformToolset>v145</PlatformToolset>
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='ESP32-Led_tg|Win32'">
+    <PlatformToolset>v145</PlatformToolset>
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='ESP32-Led_tg|x64'">
+    <PlatformToolset>v145</PlatformToolset>
+    <ConfigurationType>Makefile</ConfigurationType>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -72,15 +104,37 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <NMakeBuildCommandLine>arduino-cli compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeBuildCommandLine>arduino-cli compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeBuildCommandLine>arduino-cli compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeBuildCommandLine>arduino-cli compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ESP32-Servo_buzzer|Win32'">
+    <NMakeBuildCommandLine>"C:\disk_D\project_program\Arduino _CLI\arduino-cli.exe" compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32\Servo_buzzer"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\cores\esp32;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\variants\esp32;C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;%(AdditionalIncludeDirectories);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ESP32-Servo_buzzer|x64'">
+    <NMakeBuildCommandLine>"C:\disk_D\project_program\Arduino _CLI\arduino-cli.exe" compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32\Servo_buzzer"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\cores\esp32;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\variants\esp32;C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;%(AdditionalIncludeDirectories);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ESP32-Led_tg|Win32'">
+    <NMakeBuildCommandLine>"C:\disk_D\project_program\Arduino _CLI\arduino-cli.exe" compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32\Led_tg"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\cores\esp32;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\variants\esp32;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries\WebServer\src;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries\WiFi\src;C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;%(AdditionalIncludeDirectories);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <AdditionalOptions>-DARDUINO_ARCH_ESP32 -DSOC_WIFI_SUPPORTED=1</AdditionalOptions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ESP32-Led_tg|x64'">
+    <NMakeBuildCommandLine>"C:\disk_D\project_program\Arduino _CLI\arduino-cli.exe" compile --fqbn esp32:esp32:esp32 "C:\Users\artem\source\repos\MicroSol\ESP32\Led_tg"</NMakeBuildCommandLine>
+    <NMakeIncludeSearchPath>C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\cores\esp32;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\variants\esp32;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries\WebServer\src;C:\Users\artem\AppData\Local\Arduino15\packages\esp32\hardware\esp32\3.3.12\libraries\WiFi\src;C:\Users\artem\OneDrive\Documents\Arduino\libraries\ESP32Servo\src;%(AdditionalIncludeDirectories);$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <AdditionalOptions>-DARDUINO_ARCH_ESP32 -DSOC_WIFI_SUPPORTED=1</AdditionalOptions>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -155,10 +209,12 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="espTestDo.cpp" />
+    <ClCompile Include="Led_tg\led_tg.cpp" />
+    <ClCompile Include="Servo_buzzer\servo_buzzer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ESP32.ino" />
+    <None Include="Led_tg\Led_tg.ino" />
+    <None Include="Servo_buzzer\Servo_buzzer.ino" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

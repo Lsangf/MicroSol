@@ -1,5 +1,9 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="ESP32-Led_tg" />
+    <BuildType Name="ESP32-Servo_buzzer" />
+    <BuildType Name="Release" />
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
     <Platform Name="x86" />

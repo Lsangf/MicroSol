@@ -5,10 +5,18 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;ESP32-Servo_buzzer;ESP32-Led_tg</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Telegram.Bot" Version="22.10.3.2" />
+    <PackageReference Include="Telegram.Bots.Extensions.Polling" Version="5.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="BotService\" />
+    <Folder Include="TelegramSender\" />
+    <Folder Include="Database\" />
   </ItemGroup>
 
 </Project>

@@ -15,11 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="espTestDo.cpp">
+    <ClCompile Include="Servo_buzzer\servo_buzzer.cpp" />
+    <ClCompile Include="Led_tg\led_tg.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ESP32.ino" />
+    <None Include="Servo_buzzer\Servo_buzzer.ino" />
+    <None Include="Led_tg\Led_tg.ino" />
   </ItemGroup>
 </Project>

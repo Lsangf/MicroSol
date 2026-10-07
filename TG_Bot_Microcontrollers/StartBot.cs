@@ -1,19 +1,31 @@
-﻿using System.Reflection.Metadata;
-using Telegram.Bot;
+﻿using Telegram.Bot;
+using Telegram.Bot.Polling;
+using UpdateHandler;
 
-namespace ArduinoUno
+namespace TG_Bot_Microcontrollers
 {
-    internal class StartBot
+    public class StartBot
     {
+        const string BOT_TOKEN = "-";
+
         static async Task Main()
         {
-            var botClient = new TelegramBotClient("/");
-            string chatId = "/"; 
-            string messageText = "Hello, World!";
+            TelegramBotClient bot = new(BOT_TOKEN);
+            ReceiverOptions receiverOptions = new ReceiverOptions
+            {
+                DropPendingUpdates = true
+            };
+            CancellationTokenSource cts = new();
+            CancellationToken cancellationToken = cts.Token;
 
-            await botClient.SendMessage(chatId, messageText);
+            bot.StartReceiving(
+                UpdateManager.HandleUpdate,
+                UpdateManager.HandleError,
+                receiverOptions,
+                cancellationToken);
 
-
+            Console.WriteLine("Bot launched.");
+            Console.ReadLine();
         }
     }
 }
