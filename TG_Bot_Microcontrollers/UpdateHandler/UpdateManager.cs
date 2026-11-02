@@ -2,40 +2,119 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using TG_Bot_Microcontrollers;
-using UserStateManager;
 using BotUser = TG_Bot_Microcontrollers.UserManager.User;
 
 namespace UpdateHandler
 {
     public class UpdateManager
     {
-        static long ADMIN_CHAT_ID = 0;
-        static Dictionary<long, UserState> userStates = new Dictionary<long, UserState>();
-        static Dictionary<long, BotUser> users = new Dictionary<long, BotUser>();
-        static Esp32Client esp32Client = new Esp32Client();
-        static Dictionary<long, int> menuMessageIds = new Dictionary<long, int>();
-        static bool greenOn = false;
-        static bool redOn = false;
-        static bool yellowOn = false;
-
-        static InlineKeyboardButton turnOnGreenLedButton =
-                    InlineKeyboardButton.WithCallbackData("🟢 Turn on green led", "turn_on_green_led");
-
-        static InlineKeyboardButton turnOnRedLedButton =
-            InlineKeyboardButton.WithCallbackData("🔴 Turn on red led", "turn_on_red_led");
-
-        static InlineKeyboardButton turnOnYellowLedButton =
-            InlineKeyboardButton.WithCallbackData("🟡 Turn on yellow led", "turn_on_yellow_led");
-
-        static InlineKeyboardMarkup keyboard =
+        private static readonly long ADMIN_CHAT_ID = 0;
+        private static readonly Dictionary<long, BotUser> users = new();
+        private static readonly Dictionary<long, int> menuMessageIds = new();
+        private static readonly Dictionary<long, string> menuTexts = new();
+        private static readonly Esp32Client esp32Client = new();
+        private static bool greenOn = false;
+        private static bool redOn = false;
+        private static bool yellowOn = false;
+        private static readonly int servoStop = 90;
+        private static readonly int servoLeft = 80;
+        private static readonly int servoRight = 100;
+        private static bool servoStartBool = false;
+        private static bool servoLeftBool = false;
+        private static bool servoRightBool = false;
+        private static readonly InlineKeyboardMarkup keyboard =
             new InlineKeyboardMarkup(
                 new[]
                 {
-                    new[] { turnOnGreenLedButton },
-                    new[] { turnOnRedLedButton },
-                    new[] { turnOnYellowLedButton }
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("🟢 Toggle green led", "toggle_green_led")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("🔴 Toggle red led", "toggle_red_led")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("🟡 Toggle yellow led", "toggle_yellow_led")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("⬅️25 Servo Control left 25", "servo_control_left_25")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("➡️25 Servo Control right 25", "servo_control_right_25")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("🔄️ Servo Control start", "servo_control_start")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("⛔ Servo Control stop", "servo_control_stop")
+                    },
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData("❇️ Servo Control reset", "servo_control_reset")
+                    }
+
                 }
             );
+
+        private static string BuildMenuText()
+        {
+            return 
+                $"""
+                ———————— ESP32 BOT ————————
+
+                Capabilities:
+
+                🟢 Green LED  | {(greenOn ? "ON" : "OFF")}
+                🔴 Red LED    | {(redOn ? "ON" : "OFF")}
+                🟡 Yellow LED | {(yellowOn ? "ON" : "OFF")}
+
+                Servo Control:
+
+                ⬅️25 Servo left        | {(servoLeftBool ? "ON" : "OFF")}
+                ➡️25 Servo right       | {(servoRightBool ? "ON" : "OFF")}
+                🔄️ Servo around start: | {(servoStartBool ? "YES" : "NO")}
+                ⛔ Servo stop:         | {(servoStartBool ? "NO" : "YES")}
+                                ❇️ Servo reset   
+                """;
+        }
+
+        private static async Task ShowOrUpdateMenu(ITelegramBotClient bot, long chatId)
+        {
+            string text = BuildMenuText();
+
+            if (menuMessageIds.ContainsKey(chatId))
+            {
+                if (menuTexts.ContainsKey(chatId) && menuTexts[chatId] == text)
+                {
+                    return;
+                }
+
+                int messageId = menuMessageIds[chatId];
+
+                await bot.EditMessageText(
+                    chatId,
+                    messageId,
+                    text,
+                    replyMarkup: keyboard);
+
+                menuTexts[chatId] = text;
+                return;
+            }
+
+            Message menuMessage = await bot.SendMessage(
+                chatId,
+                text,
+                replyMarkup: keyboard);
+
+            menuMessageIds[chatId] = menuMessage.Id;
+            menuTexts[chatId] = text;
+        }
 
         public static async Task HandleUpdate(
             ITelegramBotClient bot,
@@ -46,17 +125,19 @@ namespace UpdateHandler
             {
                 long chatId = update.Message.Chat.Id;
                 User telegramUser = update.Message.From;
+                string messageText = update.Message.Text ?? "";
 
                 if (!users.ContainsKey(chatId))
                 {
-                    BotUser newUser = new BotUser();
-
-                    newUser.Id = chatId;
-                    newUser.FirstName = telegramUser.FirstName;
-                    newUser.LastName = telegramUser.LastName ?? "";
-                    newUser.Username = telegramUser.Username ?? "";
-                    newUser.RegisteredAt = DateTime.Now;
-                    newUser.IsApproved = chatId == ADMIN_CHAT_ID;
+                    BotUser newUser = new BotUser
+                    {
+                        Id = chatId,
+                        FirstName = telegramUser.FirstName,
+                        LastName = telegramUser.LastName ?? "",
+                        Username = telegramUser.Username ?? "",
+                        RegisteredAt = DateTime.Now,
+                        IsApproved = chatId == ADMIN_CHAT_ID
+                    };
 
                     users.Add(chatId, newUser);
 
@@ -77,11 +158,9 @@ namespace UpdateHandler
                                 new[]
                                 {
                                     new[] { allowButton, denyButton }
-                                }
-                            );
+                                });
 
-                        await bot.SendMessage(
-                            ADMIN_CHAT_ID,
+                        await bot.SendMessage(ADMIN_CHAT_ID,
                             $"""
                             🔔 New access request
 
@@ -92,69 +171,41 @@ namespace UpdateHandler
 
                             Allow access?
                             """,
-                            replyMarkup: adminKeyboard
-                        );
+                            replyMarkup: adminKeyboard);
                     }
                 }
 
                 BotUser user = users[chatId];
 
-                
-
-                switch (update.Message.Text)
+                switch (messageText)
                 {
                     case "/start":
-
                         await bot.SendMessage(
                             chatId,
                             $"Hi, {user.FirstName}!"
                         );
 
-                        await Task.Delay(500);
-
-                        Message menuMessage = await bot.SendMessage(
-                            chatId,
-                            """
-                            ———————— ESP32 BOT ————————
-
-                            Capabilities:
-
-                            🟢 Turn on green led
-                            🔴 Turn on red led
-                            🟡 Turn on yellow led
-                            """,
-                            replyMarkup: keyboard);
-
-                        menuMessageIds[chatId] = menuMessage.Id;
+                        await ShowOrUpdateMenu(bot, chatId);
                         break;
 
                     case "/menu":
-
-                        menuMessage = await bot.SendMessage(
-                            chatId,
-                            $"""
-                            ———————— ESP32 BOT ————————
-
-                            🟢 Green LED:  {(greenOn ? "ON" : "OFF")}
-                            🔴 Red LED:    {(redOn ? "ON" : "OFF")}
-                            🟡 Yellow LED: {(yellowOn ? "ON" : "OFF")}
-                            """,
-                            replyMarkup: keyboard);
-
-                        menuMessageIds[chatId] = menuMessage.Id;
+                        await ShowOrUpdateMenu(bot, chatId);
                         break;
                 }
+                return;
             }
-
 
             if (update.CallbackQuery != null)
             {
-                string data = update.CallbackQuery.Data;
-                long chatId = update.CallbackQuery.Message.Chat.Id;
+                string data = update.CallbackQuery.Data ?? "";
+                await bot.AnswerCallbackQuery(update.CallbackQuery.Id);
 
-                await bot.AnswerCallbackQuery(
-                    update.CallbackQuery.Id
-                );
+                if (update.CallbackQuery.Message == null)
+                {
+                    return;
+                }
+
+                long chatId = update.CallbackQuery.Message.Chat.Id;
 
                 if (data.StartsWith("allow_user:"))
                 {
@@ -162,8 +213,7 @@ namespace UpdateHandler
                     {
                         await bot.SendMessage(
                             chatId,
-                            "⛔ You are not the administrator."
-                        );
+                            "⛔ You are not the administrator.");
                         return;
                     }
 
@@ -174,27 +224,22 @@ namespace UpdateHandler
                     {
                         await bot.SendMessage(
                             chatId,
-                            "❌ User not found."
-                        );
+                            "❌ User not found.");
                         return;
                     }
 
                     BotUser user = users[userId];
-
                     user.IsApproved = true;
 
                     Console.WriteLine($"Access approved: {user.FirstName} ({user.Id})");
 
                     await bot.SendMessage(
                         user.Id,
-                        "✅ Access approved!\n\nYou can now use ESP32 controls."
-                    );
+                        "✅ Access approved!\n\nYou can now use ESP32 controls.");
 
                     await bot.SendMessage(
                         chatId,
-                        $"✅ Access granted to {user.FirstName}."
-                    );
-
+                        $"✅ Access granted to {user.FirstName}.");
                     return;
                 }
 
@@ -204,8 +249,7 @@ namespace UpdateHandler
                     {
                         await bot.SendMessage(
                             chatId,
-                            "⛔ You are not the administrator."
-                        );
+                            "⛔ You are not the administrator.");
                         return;
                     }
 
@@ -216,27 +260,22 @@ namespace UpdateHandler
                     {
                         await bot.SendMessage(
                             chatId,
-                            "❌ User not found."
-                        );
+                            "❌ User not found.");
                         return;
                     }
 
                     BotUser user = users[userId];
-
                     user.IsApproved = false;
 
-                    Console.WriteLine($"Access denied: {user.FirstName} ({user.Id})"
-                    );
+                    Console.WriteLine($"Access denied: {user.FirstName} ({user.Id})");
 
                     await bot.SendMessage(
                         user.Id,
-                        "❌ Access denied."
-                    );
+                        "❌ Access denied.");
 
                     await bot.SendMessage(
                         chatId,
-                        $"❌ Access denied for {user.FirstName}."
-                    );
+                        $"❌ Access denied for {user.FirstName}.");
 
                     return;
                 }
@@ -256,88 +295,74 @@ namespace UpdateHandler
                     return;
                 }
 
-                string result = "";
+                string result;
 
                 switch (data)
                 {
-                    case "turn_on_green_led":
-                        Console.WriteLine("The green led button was pressed");
+                    case "toggle_green_led":
+                        result = await esp32Client.ToggleGreenLed();
+                        greenOn = !greenOn;
+                        break;
 
-                        result = await esp32Client.TurnOnGreenLed();
-                        Console.WriteLine(result);
-                        greenOn = true;
-                        if (menuMessageIds.ContainsKey(chatId))
+                    case "toggle_red_led":
+                        result = await esp32Client.ToggleRedLed();
+                        redOn = !redOn;
+                        break;
+
+                    case "toggle_yellow_led":
+                        result = await esp32Client.ToggleYellowLed();
+                        yellowOn = !yellowOn;
+                        break;
+
+                    case "servo_control_left_25":
+                        result = await esp32Client.TurnLeft25Servo();
+                        servoLeftBool = !servoLeftBool;
+                        servoRightBool = !servoLeftBool;
+                        break;
+
+                    case "servo_control_right_25":
+                        result = await esp32Client.TurnRight25Servo();
+                        servoRightBool = !servoRightBool;
+                        servoLeftBool = !servoRightBool;
+                        break;
+
+                    case "servo_control_start":
+                        result = await esp32Client.StartServo();
+                        servoStartBool = !servoStartBool;
+                        if (result.Contains("Servo started left"))
                         {
-                            int menuMessageId = menuMessageIds[chatId];
-
-                            await bot.EditMessageText(
-                                chatId,
-                                menuMessageId,
-                                $"""
-                                ———————— ESP32 BOT ————————
-
-                                🟢 Green LED:  {(greenOn ? "ON" : "OFF")}
-                                🔴 Red LED:    {(redOn ? "ON" : "OFF")}
-                                🟡 Yellow LED: {(yellowOn ? "ON" : "OFF")}
-                                """,
-                                replyMarkup: keyboard);
+                            servoLeftBool = true;
+                            servoRightBool = false;
+                        }
+                        else if (result.Contains("Servo started right"))
+                        {
+                            servoLeftBool = false;
+                            servoRightBool = true;
                         }
                         break;
 
-                    case "turn_on_red_led":
-                        Console.WriteLine("The red led button was pressed");
-
-                        result = await esp32Client.TurnOnRedLed();
-                        Console.WriteLine(result);
-                        redOn = true;
-                        if (menuMessageIds.ContainsKey(chatId))
-                        {
-                            int menuMessageId = menuMessageIds[chatId];
-
-                            await bot.EditMessageText(
-                                chatId,
-                                menuMessageId,
-                                $"""
-                                ———————— ESP32 BOT ————————
-
-                                🟢 Green LED:  {(greenOn ? "ON" : "OFF")}
-                                🔴 Red LED:    {(redOn ? "ON" : "OFF")}
-                                🟡 Yellow LED: {(yellowOn ? "ON" : "OFF")}
-                                """,
-                                replyMarkup: keyboard);
-                        }
+                    case "servo_control_stop":
+                        result = await esp32Client.StopServo();
+                        servoStartBool = !servoStartBool;
+                        servoLeftBool = false;
+                        servoRightBool = false;
                         break;
 
-                    case "turn_on_yellow_led":
-                        Console.WriteLine("The yellow led button was pressed");
-
-                        result = await esp32Client.TurnOnYellowLed();
-                        Console.WriteLine(result);
-                        yellowOn = true;
-                        if (menuMessageIds.ContainsKey(chatId))
-                        {
-                            int menuMessageId = menuMessageIds[chatId];
-
-                            await bot.EditMessageText(
-                                chatId,
-                                menuMessageId,
-                                $"""
-                                ———————— ESP32 BOT ————————
-
-                                🟢 Green LED:  {(greenOn ? "ON" : "OFF")}
-                                🔴 Red LED:    {(redOn ? "ON" : "OFF")}
-                                🟡 Yellow LED: {(yellowOn ? "ON" : "OFF")}
-                                """,
-                                replyMarkup: keyboard);
-                        }
+                    case "servo_control_reset":
+                        result = await esp32Client.ResetServo();
+                        servoStartBool = false;
+                        servoLeftBool = false;
+                        servoRightBool = false;
                         break;
+
+                    default:
+                        return;
                 }
-            }
-        }
 
-        public static Task SendMessageTo(ITelegramBotClient bot, long chatIdOut, long chatIdIn, string message)
-        {
-            return bot.SendMessage(chatIdIn, message);
+                Console.WriteLine(result);
+                
+                await ShowOrUpdateMenu(bot, chatId);
+            }
         }
 
         public static Task HandleError(
@@ -346,7 +371,6 @@ namespace UpdateHandler
             CancellationToken cancellationToken)
         {
             Console.WriteLine(exception.Message);
-
             return Task.CompletedTask;
         }
     }

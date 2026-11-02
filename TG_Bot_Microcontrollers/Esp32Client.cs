@@ -1,35 +1,56 @@
-﻿using System.Net.Http;
-
-namespace TG_Bot_Microcontrollers
+﻿namespace TG_Bot_Microcontrollers
 {
     public class Esp32Client
     {
         private readonly HttpClient httpClient = new HttpClient();
-
         private readonly string esp32Address = "-";
 
-        public async Task<string> TurnOnGreenLed()
+        private async Task<string> SendCommand(string path)
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{esp32Address}/led/green/on");
-
+            HttpResponseMessage response = await httpClient.GetAsync($"{esp32Address}{path}");
+            response.EnsureSuccessStatusCode();
             string result = await response.Content.ReadAsStringAsync();
             return result;
         }
 
-        public async Task<string> TurnOnRedLed()
+        public Task<string> ToggleGreenLed()
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{esp32Address}/led/red/on");
-
-            string result = await response.Content.ReadAsStringAsync();
-            return result;
+            return SendCommand("/led/green/toggle");
         }
 
-        public async Task<string> TurnOnYellowLed()
+        public Task<string> ToggleRedLed()
         {
-            HttpResponseMessage response = await httpClient.GetAsync($"{esp32Address}/led/yellow/on");
+            return SendCommand("/led/red/toggle");
+        }
 
-            string result = await response.Content.ReadAsStringAsync();
-            return result;
+        public Task<string> ToggleYellowLed()
+        {
+            return SendCommand("/led/yellow/toggle");
+        }
+
+        public Task<string> StartServo()
+        {
+            return SendCommand("/servo/start");
+        }
+
+        public Task<string> StopServo()
+        {
+            return SendCommand("/servo/stop");
+        }
+
+        public Task<string> ResetServo()
+        {
+            return SendCommand("/servo/reset");
+        }
+
+        public Task<string> TurnLeft25Servo()
+        {
+            return SendCommand("/servo/left25");
+        }
+
+        public Task<string> TurnRight25Servo()
+        {
+            return SendCommand("/servo/right25");
         }
     }
 }
